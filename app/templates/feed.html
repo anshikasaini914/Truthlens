@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Feed — TruthLens{% endblock %}
+{% block content %}
+
+<div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+  <div>
+    <h1 class="text-xl font-bold">Public feed</h1>
+    <p class="text-sm text-gray-500">All submitted claims, verified or not — always clearly labeled.</p>
+  </div>
+
+  <form method="get" action="/feed" class="flex flex-wrap gap-2 items-center text-sm">
+    <select name="category" onchange="this.form.submit()" class="border border-gray-300 rounded-lg px-2 py-1.5">
+      {% for c in categories %}
+      <option value="{{ c }}" {% if c == selected_category %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+    <select name="status" onchange="this.form.submit()" class="border border-gray-300 rounded-lg px-2 py-1.5">
+      {% for s in statuses %}
+      <option value="{{ s }}" {% if s == selected_status %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <div class="flex border border-gray-300 rounded-lg overflow-hidden">
+      <a href="/feed?category={{ selected_category }}&status={{ selected_status }}&sort=risk"
+         class="px-3 py-1.5 {% if sort == 'risk' %}bg-indigo-600 text-white{% else %}bg-white text-gray-600{% endif %}">
+         🔥 Risk first
+      </a>
+      <a href="/feed?category={{ selected_category }}&status={{ selected_status }}&sort=recent"
+         class="px-3 py-1.5 {% if sort == 'recent' %}bg-indigo-600 text-white{% else %}bg-white text-gray-600{% endif %}">
+         🕒 Newest first
+      </a>
+    </div>
+  </form>
+</div>
+
+{% if not claims %}
+<div class="text-center text-gray-400 py-16 bg-white rounded-2xl border border-gray-100">
+  No claims match these filters yet.
+</div>
+{% endif %}
+
+<div class="space-y-3">
+  {% for claim in claims %}
+  <a href="/claims/{{ claim.id }}" class="block bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:border-indigo-300 transition">
+    <div class="flex items-center gap-2 mb-2 flex-wrap">
+      {% if claim.risk_level == "High Risk" %}
+      <span class="badge bg-red-600 text-white">🔥 High Risk</span>
+      {% endif %}
+      <span class="badge {{ status_badge[claim.status] }}">{{ claim.status }}</span>
+      <span class="badge bg-indigo-50 text-indigo-700">{{ claim.category }}</span>
+      <span class="text-xs text-gray-400">via {{ claim.source_platform }}</span>
+      <span class="text-xs text-gray-400 ml-auto">{{ claim.submitted_at.strftime("%d %b, %I:%M %p") }}</span>
+    </div>
+    <p class="text-sm text-gray-800">{{ claim.text[:220] }}{% if claim.text|length > 220 %}…{% endif %}</p>
+    {% if claim.flags %}
+    <div class="mt-2 flex gap-1 flex-wrap">
+      {% for f in claim.flags %}
+      <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{{ f }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

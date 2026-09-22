@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Claim #{{ claim.id }} — TruthLens{% endblock %}
+{% block content %}
+
+<a href="/feed" class="text-sm text-indigo-600 hover:underline">&larr; Back to feed</a>
+
+{% if submitted %}
+<div class="mt-3 bg-green-50 text-green-700 text-sm px-4 py-2 rounded-lg">✅ Claim submitted successfully.</div>
+{% endif %}
+{% if reviewed %}
+<div class="mt-3 bg-green-50 text-green-700 text-sm px-4 py-2 rounded-lg">✅ Review saved.</div>
+{% endif %}
+{% if edited %}
+<div class="mt-3 bg-green-50 text-green-700 text-sm px-4 py-2 rounded-lg">✅ Claim updated — flags recalculated.</div>
+{% endif %}
+
+<div class="mt-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    {% if claim.risk_level == "High Risk" %}
+    <span class="badge bg-red-600 text-white">🔥 High Risk</span>
+    {% endif %}
+    <span class="badge {{ status_badge[claim.status] }}">{{ claim.status }}</span>
+    <span class="badge bg-indigo-50 text-indigo-700">{{ claim.category }}</span>
+    <span class="text-xs text-gray-400">via {{ claim.source_platform }}</span>
+  </div>
+
+  <p class="text-gray-900 whitespace-pre-wrap mb-4">{{ claim.text }}</p>
+
+  {% if claim.source_link %}
+  <p class="text-sm mb-3"><a href="{{ claim.source_link }}" target="_blank" class="text-indigo-600 hover:underline">🔗 {{ claim.source_link }}</a></p>
+  {% endif %}
+
+  {% if claim.flags %}
+  <div class="flex gap-2 flex-wrap mb-4">
+    {% for f in claim.flags %}
+    <span class="text-xs font-medium text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full">⚑ {{ f }}</span>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-xs text-gray-400 mb-4">No risk flags detected.</p>
+  {% endif %}
+
+  <div class="text-xs text-gray-400 border-t pt-3 flex justify-between flex-wrap gap-1">
+    <span>Submitted: {{ claim.submitted_at.strftime("%d %b %Y, %I:%M %p") }}</span>
+    <span>Last updated: {{ claim.updated_at.strftime("%d %b %Y, %I:%M %p") }}</span>
+  </div>
+
+  {% if claim.reviewer_note %}
+  <div class="mt-4 bg-indigo-50 border border-indigo-100 rounded-lg p-3">
+    <p class="text-xs font-semibold text-indigo-700 mb-1">Reviewer note</p>
+    <p class="text-sm text-indigo-900">{{ claim.reviewer_note }}</p>
+  </div>
+  {% endif %}
+
+  <a href="/claims/{{ claim.id }}/edit" class="inline-block mt-4 text-sm text-gray-500 hover:text-indigo-600">✏️ Edit this claim</a>
+</div>
+
+<div class="mt-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+  <h2 class="font-semibold mb-3">Review this claim</h2>
+  <form method="post" action="/claims/{{ claim.id }}/review" class="space-y-3">
+    <div>
+      <label class="block text-sm font-medium mb-1">Status</label>
+      <select name="status" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm">
+        {% for s in statuses %}
+        <option value="{{ s }}" {% if s == claim.status %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Reviewer note</label>
+      <textarea name="reviewer_note" rows="2" placeholder="Why this decision? (visible publicly)"
+        class="w-full border border-gray-300 rounded-lg p-2.5 text-sm">{{ claim.reviewer_note or "" }}</textarea>
+    </div>
+    <button type="submit" class="bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-700">
+      Save review
+    </button>
+  </form>
+</div>
+{% endblock %}
