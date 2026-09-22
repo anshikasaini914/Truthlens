@@ -2,6 +2,8 @@
 
 **Hackathon ID:** `AZIS-DVBP77`
 
+**Live app:** https://truthlens-zu23.onrender.com
+
 **Track:** Civic Tech — Misinformation Triage Platform (Code2Career hackathon by AzislyAI)
 
 A neutral misinformation triage tool for a newsroom or citizen group: submit a viral claim, get automatic risk flags, and let a human reviewer verify it — without checking anyone's identity to do it.
